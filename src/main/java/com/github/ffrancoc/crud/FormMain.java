@@ -18,6 +18,9 @@ public class FormMain extends javax.swing.JFrame {
      */
     public FormMain() {
         initComponents();
+        tblRegistros.getColumnModel().getColumn(0).setMinWidth(0);
+        tblRegistros.getColumnModel().getColumn(0).setMaxWidth(0);
+        loadDataFromDB(); // Cargar los registros de la base de datos
     }
 
     /**
@@ -170,7 +173,7 @@ public class FormMain extends javax.swing.JFrame {
                     .addComponent(btnEliminar)
                     .addComponent(btnActualizar)
                     .addComponent(btnCancelar))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         tblRegistros.setModel(new javax.swing.table.DefaultTableModel(
@@ -178,14 +181,14 @@ public class FormMain extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Nombre", "Apellido", "Fecha Nacimiento", "Genero"
+                "Id", "Nombre", "Apellido", "Fecha Nacimiento", "Genero"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -237,11 +240,9 @@ public class FormMain extends javax.swing.JFrame {
         persona.setGenero(txtGenero.getSelectedItem().toString());
 
         if (persona.getNombre().length() > 0 && persona.getApellido().length() > 0 && persona.getFnacimiento().length() > 0 && persona.getGenero().length() > 0) {
-            var model = (DefaultTableModel) tblRegistros.getModel();
-            model.addRow(persona.getPersona());
-            int nItems = model.getRowCount();
-            lblInfo.setText(nItems + " Registros");
+            Conexion.postPersona(persona);
             cleanForm();
+            loadDataFromDB();
         }
     }//GEN-LAST:event_btnGuardarActionPerformed
 
@@ -250,10 +251,11 @@ public class FormMain extends javax.swing.JFrame {
         int row = tblRegistros.getSelectedRow();
         if (row >= 0) {
             persona = new Persona();
-            persona.setNombre((String) model.getValueAt(row, 0));
-            persona.setApellido((String) model.getValueAt(row, 1));
-            persona.setFnacimiento((String) model.getValueAt(row, 2));
-            persona.setGenero((String) model.getValueAt(row, 3));
+            persona.setId((int) model.getValueAt(row, 0));
+            persona.setNombre((String) model.getValueAt(row, 1));
+            persona.setApellido((String) model.getValueAt(row, 2));
+            persona.setFnacimiento((String) model.getValueAt(row, 3));
+            persona.setGenero((String) model.getValueAt(row, 4));
 
             txtNombre.setText(persona.getNombre());
             txtApellido.setText(persona.getApellido());
@@ -275,25 +277,21 @@ public class FormMain extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
-        persona = new Persona();
+        //persona = new Persona();
         persona.setNombre(txtNombre.getText());
         persona.setApellido(txtApellido.getText());
         persona.setFnacimiento(txtFechaNacimiento.getText());
         persona.setGenero(txtGenero.getSelectedItem().toString());
 
         if (persona.getNombre().length() > 0 && persona.getApellido().length() > 0 && persona.getFnacimiento().length() > 0 && persona.getGenero().length() > 0) {
-            var model = (DefaultTableModel) tblRegistros.getModel();
-            int row = tblRegistros.getSelectedRow();
-
-            model.setValueAt(persona.getNombre(), row, 0);
-            model.setValueAt(persona.getApellido(), row, 1);
-            model.setValueAt(persona.getFnacimiento(), row, 2);
-            model.setValueAt(persona.getGenero(), row, 3);
             btnGuardar.setEnabled(true);
             btnEditar.setEnabled(true);
             btnActualizar.setEnabled(false);
             btnCancelar.setEnabled(false);
+
+            Conexion.putPersona(persona);
             cleanForm();
+            loadDataFromDB();
         }
     }//GEN-LAST:event_btnActualizarActionPerformed
 
@@ -303,12 +301,28 @@ public class FormMain extends javax.swing.JFrame {
             int confirm = JOptionPane.showConfirmDialog(this, "Confirmar accion?", "Eliminar Registro", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 var model = (DefaultTableModel) tblRegistros.getModel();
-                model.removeRow(row);
-                int nItems = model.getRowCount();
-                lblInfo.setText(nItems + " Registros");
+                int id = (int) model.getValueAt(row, 0);
+
+                Conexion.deletePersona(id);
+                cleanForm();
+                loadDataFromDB();
             }
         }
     }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void loadDataFromDB() {
+        var model = (DefaultTableModel) tblRegistros.getModel();
+        model.setRowCount(0);
+
+        var personas = Conexion.getPersonas();
+        if (!personas.isEmpty()) {
+            personas.forEach(p -> {
+                model.addRow(p.getPersona());
+                int nItems = model.getRowCount();
+                lblInfo.setText(nItems + " Registros");
+            });
+        }
+    }
 
     private void cleanForm() {
         txtNombre.setText("");

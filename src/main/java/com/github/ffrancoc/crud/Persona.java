@@ -10,12 +10,21 @@ package com.github.ffrancoc.crud;
  */
 public class Persona {
 
+    private int id;
     private String nombre;
     private String apellido;
     private String fnacimiento;
     private String genero;
 
     public Persona() {
+    }
+
+    public Persona(int id, String nombre, String apellido, String fnacimiento, String genero) {
+        this.id = id;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.fnacimiento = fnacimiento;
+        this.genero = genero;
     }
 
     public Persona(String nombre, String apellido, String fnacimiento, String genero) {
@@ -26,7 +35,15 @@ public class Persona {
     }
 
     public Object[] getPersona() {
-        return new Object[]{nombre, apellido, fnacimiento, genero};
+        return new Object[]{id, nombre, apellido, fnacimiento, genero};
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNombre() {

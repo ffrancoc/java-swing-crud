@@ -1,7 +1,6 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
-
 package com.github.ffrancoc.crud;
 
 /**
@@ -11,7 +10,9 @@ package com.github.ffrancoc.crud;
 public class CRUD {
 
     public static void main(String[] args) {
-        var form = new FormMain();        
+
+        var form = new FormMain();
         form.setVisible(true);
+
     }
 }
